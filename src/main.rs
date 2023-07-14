@@ -1,14 +1,18 @@
 use axum::{response::Html, routing::get, Router};
+use config::Config;
 use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
 
 use crate::logger::logger_init;
 
+mod config;
 mod error;
 mod logger;
 
 #[tokio::main]
 async fn main() {
+    let config = Config::build().expect("Init config failed");
+
     logger_init().expect("cannot init logger");
 
     let app = Router::new().route("/", get(handler)).layer(
@@ -17,8 +21,7 @@ async fn main() {
             .on_response(trace::DefaultOnResponse::new().level(Level::INFO)),
     );
 
-    // run it with hyper on localhost:3000
-    axum::Server::bind(&"0.0.0.0:3001".parse().unwrap())
+    axum::Server::bind(&format!("0.0.0.0:{}", config.port).parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
