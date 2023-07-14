@@ -7,7 +7,7 @@ use tracing_subscriber::{
 
 use crate::{config::Config, error::MResult};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum LogLevel {
     INFO,
     DEBUG,
@@ -71,4 +71,24 @@ pub fn logger_init(config: &Config) -> MResult<()> {
         .init();
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::LogLevel;
+
+    #[test]
+    fn from_test() {
+        let level = "info";
+        let info = LogLevel::from(level);
+        assert_eq!(LogLevel::INFO, info);
+
+        let level = "debug";
+        let info = LogLevel::from(level);
+        assert_eq!(LogLevel::DEBUG, info);
+
+        let level = "info";
+        let info = LogLevel::from(level);
+        assert_ne!(LogLevel::DEBUG, info);
+    }
 }
