@@ -4,42 +4,16 @@ use std::{
     path::PathBuf,
 };
 
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 
-use crate::error::MResult;
+use crate::{error::MResult, logger::LogLevel};
 
 fn default_port() -> usize {
     4000
 }
 fn default_log_level() -> LogLevel {
-    LogLevel::INFO
-}
-
-#[derive(Debug, Clone)]
-pub enum LogLevel {
-    INFO,
-}
-impl Serialize for LogLevel {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(match self {
-            LogLevel::INFO => "info",
-        })
-    }
-}
-impl<'de> Deserialize<'de> for LogLevel {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        Ok(match s.as_str() {
-            "info" => LogLevel::INFO,
-            _ => LogLevel::INFO,
-        })
-    }
+    let env = env::var("LOG_LEVEL").unwrap_or("info".to_owned());
+    LogLevel::from(env.as_str())
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -13,7 +13,7 @@ mod logger;
 async fn main() {
     let config = Config::build().expect("Init config failed");
 
-    logger_init().expect("cannot init logger");
+    logger_init(&config).expect("cannot init logger");
 
     let app = Router::new().route("/", get(handler)).layer(
         TraceLayer::new_for_http()
