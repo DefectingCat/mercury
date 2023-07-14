@@ -1,3 +1,4 @@
+use filter::LevelFilter;
 use serde::{Deserialize, Deserializer, Serialize};
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{
@@ -9,14 +10,17 @@ use crate::{config::Config, error::MResult};
 #[derive(Debug, Clone)]
 pub enum LogLevel {
     INFO,
+    DEBUG,
 }
 impl Serialize for LogLevel {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
+        use LogLevel::*;
         serializer.serialize_str(match self {
-            LogLevel::INFO => "info",
+            INFO => "info",
+            DEBUG => "debug",
         })
     }
 }
@@ -33,9 +37,11 @@ impl<'de> Deserialize<'de> for LogLevel {
     }
 }
 impl LogLevel {
-    pub fn to_filterd(&self) -> filter::LevelFilter {
+    pub fn to_filterd(&self) -> LevelFilter {
+        use LogLevel::*;
         match self {
-            LogLevel::INFO => filter::LevelFilter::INFO,
+            INFO => LevelFilter::INFO,
+            DEBUG => LevelFilter::DEBUG,
         }
     }
 }
@@ -43,6 +49,7 @@ impl From<&str> for LogLevel {
     fn from(value: &str) -> Self {
         match value {
             "info" => Self::INFO,
+            "debug" => Self::DEBUG,
             _ => Self::INFO,
         }
     }
