@@ -17,11 +17,7 @@ impl Serialize for LogLevel {
     where
         S: serde::Serializer,
     {
-        use LogLevel::*;
-        serializer.serialize_str(match self {
-            INFO => "info",
-            DEBUG => "debug",
-        })
+        serializer.serialize_str(self.to_string())
     }
 }
 impl<'de> Deserialize<'de> for LogLevel {
@@ -30,10 +26,7 @@ impl<'de> Deserialize<'de> for LogLevel {
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        Ok(match s.as_str() {
-            "info" => LogLevel::INFO,
-            _ => LogLevel::INFO,
-        })
+        Ok(LogLevel::from(s.as_str()))
     }
 }
 impl LogLevel {
@@ -42,6 +35,13 @@ impl LogLevel {
         match self {
             INFO => LevelFilter::INFO,
             DEBUG => LevelFilter::DEBUG,
+        }
+    }
+    pub fn to_string(&self) -> &str {
+        use LogLevel::*;
+        match self {
+            INFO => "info",
+            DEBUG => "debug",
         }
     }
 }
